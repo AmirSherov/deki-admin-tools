@@ -27,17 +27,17 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, rate(django_http_requests_latency_seconds_by_view_method_bucket[5m]))",
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])))",
           "legendFormat": "p50",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, rate(django_http_requests_latency_seconds_by_view_method_bucket[5m]))",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])))",
           "legendFormat": "p95",
           "refId": "B"
         },
         {
-          "expr": "histogram_quantile(0.99, rate(django_http_requests_latency_seconds_by_view_method_bucket[5m]))",
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])))",
           "legendFormat": "p99",
           "refId": "C"
         }
@@ -96,30 +96,88 @@
       }
     },
     {
-      "title": "Slowest Endpoints (p95 latency)",
+      "title": "All Endpoints — p50 / p95 / req/s",
       "type": "table",
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
+      "gridPos": { "h": 16, "w": 24, "x": 0, "y": 16 },
       "targets": [
         {
-          "expr": "topk(15, histogram_quantile(0.95, sum by (le, view) (rate(django_http_requests_latency_seconds_by_view_method_bucket[5m]))))",
+          "expr": "histogram_quantile(0.50, sum by (le, view) (rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])))",
           "legendFormat": "{{view}}",
           "refId": "A",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, view) (rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])))",
+          "legendFormat": "{{view}}",
+          "refId": "B",
+          "format": "table",
+          "instant": true
+        },
+        {
+          "expr": "sum by (view) (rate(django_http_requests_latency_seconds_by_view_method_count[5m]))",
+          "legendFormat": "{{view}}",
+          "refId": "C",
           "format": "table",
           "instant": true
         }
       ],
       "fieldConfig": {
         "defaults": { "unit": "s" },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "req/s" },
+            "properties": [{ "id": "unit", "value": "reqps" }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "p95" },
+            "properties": [
+              { "id": "custom.displayMode", "value": "color-background" },
+              {
+                "id": "thresholds",
+                "value": {
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 0.5 },
+                    { "color": "red", "value": 1.5 }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "sortBy": [{ "displayName": "p95", "desc": true }]
       },
       "transformations": [
-        { "id": "organize", "options": { "renameByName": { "view": "Endpoint", "Value": "p95 Latency" } } }
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "view": "Endpoint",
+              "Value #A": "p50",
+              "Value #B": "p95",
+              "Value #C": "req/s"
+            },
+            "indexByName": {
+              "Endpoint": 0,
+              "req/s": 1,
+              "p50": 2,
+              "p95": 3
+            }
+          }
+        }
       ]
     },
     {
       "title": "DB Connections",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 26 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
       "targets": [
         {
           "expr": "django_db_new_connections_total",
@@ -135,7 +193,7 @@
     {
       "title": "DB Errors",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 26 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
       "targets": [
         {
           "expr": "rate(django_db_errors_total[5m])",
