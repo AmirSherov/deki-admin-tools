@@ -1,0 +1,93 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: admin-nginx
+    restart: always
+    ports:
+      - "${LISTEN_PORT:-80}:80"
+    volumes:
+      - ./nginx/nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+    environment:
+      NGINX_ENVSUBST_FILTER: "ALLOWED_IP"
+      ALLOWED_IP: ${ALLOWED_IP:-127.0.0.1}
+    depends_on:
+      - portainer
+      - redis-commander
+      - grafana
+      - prometheus
+    networks:
+      - internal
+      - external
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    expose:
+      - "9000"
+    networks:
+      - internal
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander
+    restart: unless-stopped
+    environment:
+      REDIS_HOSTS: ${REDIS_HOSTS:-local:redis:6379}
+    expose:
+      - "8081"
+    networks:
+      - internal
+      - external
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: always
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.external-url=/prometheus/"
+      - "--web.route-prefix=/prometheus/"
+    expose:
+      - "9090"
+    networks:
+      - internal
+      - external
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: always
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      GF_SERVER_ROOT_URL: "http://localhost/grafana/"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    expose:
+      - "3000"
+    networks:
+      - internal
+
+volumes:
+  portainer_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  internal:
+    driver: bridge
+  external:
+    name: ${EXTERNAL_NETWORK:-deki-mono_default}
+    external: true
