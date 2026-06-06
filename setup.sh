@@ -75,7 +75,7 @@ server {
     location /grafana/ {
         allow $ALLOWED_IP;
         deny all;
-        proxy_pass http://127.0.0.1:3000/grafana/;
+        proxy_pass http://127.0.0.1:3333/grafana/;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";

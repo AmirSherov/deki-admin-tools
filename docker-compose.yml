@@ -54,7 +54,7 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
       GF_AUTH_ANONYMOUS_ENABLED: "false"
     ports:
-      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:3333:3000"
     networks:
       - external
 
