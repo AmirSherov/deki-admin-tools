@@ -1,0 +1,164 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [],
+  "panels": [
+    {
+      "title": "CPU Usage (%)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+          "legendFormat": "cpu",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "percent", "min": 0, "max": 100 },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Memory Usage (%)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+          "legendFormat": "memory",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "percent", "min": 0, "max": 100 },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Load Average",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "node_load1",
+          "legendFormat": "1m",
+          "refId": "A"
+        },
+        {
+          "expr": "node_load5",
+          "legendFormat": "5m",
+          "refId": "B"
+        },
+        {
+          "expr": "node_load15",
+          "legendFormat": "15m",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "short" },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Disk Usage (%) — root",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "100 - ((node_filesystem_avail_bytes{mountpoint=\"/\",fstype!=\"rootfs\"} / node_filesystem_size_bytes{mountpoint=\"/\",fstype!=\"rootfs\"}) * 100)",
+          "legendFormat": "disk /",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "percent", "min": 0, "max": 100 },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Network Traffic",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "targets": [
+        {
+          "expr": "rate(node_network_receive_bytes_total{device!=\"lo\"}[5m])",
+          "legendFormat": "rx {{device}}",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(node_network_transmit_bytes_total{device!=\"lo\"}[5m])",
+          "legendFormat": "tx {{device}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "Bps" },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Disk I/O",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "targets": [
+        {
+          "expr": "rate(node_disk_read_bytes_total[5m])",
+          "legendFormat": "read {{device}}",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(node_disk_written_bytes_total[5m])",
+          "legendFormat": "write {{device}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "Bps" },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Uptime",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 24 },
+      "targets": [
+        {
+          "expr": "time() - node_boot_time_seconds",
+          "legendFormat": "uptime",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "s" },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Root Filesystem Free",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 24 },
+      "targets": [
+        {
+          "expr": "node_filesystem_avail_bytes{mountpoint=\"/\",fstype!=\"rootfs\"}",
+          "legendFormat": "free",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "bytes" },
+        "overrides": []
+      }
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "tags": ["deki", "system"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "VPS System Metrics",
+  "uid": "vps-system-metrics"
+}
