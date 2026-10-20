@@ -11,7 +11,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
       "targets": [
         {
-          "expr": "rate(django_http_requests_total_by_method_total[5m])",
+          "expr": "sum by (method) (rate(django_http_requests_total_by_method_total[5m]))",
           "legendFormat": "{{method}}",
           "refId": "A"
         }
@@ -53,7 +53,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "targets": [
         {
-          "expr": "rate(django_http_responses_total_by_status_total[5m])",
+          "expr": "sum by (status) (rate(django_http_responses_total_by_status_total[5m]))",
           "legendFormat": "{{status}}",
           "refId": "A"
         }
@@ -85,7 +85,7 @@
       "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
       "targets": [
         {
-          "expr": "django_http_requests_before_middlewares_total - django_http_responses_before_middlewares_total",
+          "expr": "sum(django_http_requests_before_middlewares_total) - sum(django_http_responses_before_middlewares_total)",
           "legendFormat": "In-flight",
           "refId": "A"
         }
@@ -180,7 +180,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
       "targets": [
         {
-          "expr": "django_db_new_connections_total",
+          "expr": "sum(django_db_new_connections_total)",
           "legendFormat": "new connections",
           "refId": "A"
         }
@@ -196,7 +196,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
       "targets": [
         {
-          "expr": "rate(django_db_errors_total[5m])",
+          "expr": "sum by (type) (rate(django_db_errors_total[5m]))",
           "legendFormat": "{{type}}",
           "refId": "A"
         }
