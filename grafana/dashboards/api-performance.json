@@ -11,7 +11,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
       "targets": [
         {
-          "expr": "sum by (method) (rate(django_http_requests_total_by_method_total[5m]))",
+          "expr": "sum by (method) (rate(django_http_requests_total_by_method_total{instance=~\"$instance\"}[5m]))",
           "legendFormat": "{{method}}",
           "refId": "A"
         }
@@ -27,17 +27,17 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum by (le) (rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])))",
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(django_http_requests_latency_seconds_by_view_method_bucket{instance=~\"$instance\"}[5m])))",
           "legendFormat": "p50",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(django_http_requests_latency_seconds_by_view_method_bucket{instance=~\"$instance\"}[5m])))",
           "legendFormat": "p95",
           "refId": "B"
         },
         {
-          "expr": "histogram_quantile(0.99, sum by (le) (rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])))",
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(django_http_requests_latency_seconds_by_view_method_bucket{instance=~\"$instance\"}[5m])))",
           "legendFormat": "p99",
           "refId": "C"
         }
@@ -53,7 +53,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "targets": [
         {
-          "expr": "sum by (status) (rate(django_http_responses_total_by_status_total[5m]))",
+          "expr": "sum by (status) (rate(django_http_responses_total_by_status_total{instance=~\"$instance\"}[5m]))",
           "legendFormat": "{{status}}",
           "refId": "A"
         }
@@ -69,7 +69,7 @@
       "gridPos": { "h": 8, "w": 6, "x": 12, "y": 8 },
       "targets": [
         {
-          "expr": "sum(rate(django_http_responses_total_by_status_total{status=~\"4..|5..\"}[5m])) / sum(rate(django_http_responses_total_by_status_total[5m])) * 100",
+          "expr": "sum(rate(django_http_responses_total_by_status_total{instance=~\"$instance\",status=~\"4..|5..\"}[5m])) / sum(rate(django_http_responses_total_by_status_total{instance=~\"$instance\"}[5m])) * 100",
           "legendFormat": "Error %",
           "refId": "A"
         }
@@ -85,7 +85,7 @@
       "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
       "targets": [
         {
-          "expr": "sum(django_http_requests_before_middlewares_total) - sum(django_http_responses_before_middlewares_total)",
+          "expr": "sum(django_http_requests_before_middlewares_total{instance=~\"$instance\"}) - sum(django_http_responses_before_middlewares_total{instance=~\"$instance\"})",
           "legendFormat": "In-flight",
           "refId": "A"
         }
@@ -101,21 +101,21 @@
       "gridPos": { "h": 16, "w": 24, "x": 0, "y": 16 },
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum by (le, view) (rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])))",
+          "expr": "histogram_quantile(0.50, sum by (le, view) (rate(django_http_requests_latency_seconds_by_view_method_bucket{instance=~\"$instance\"}[5m])))",
           "legendFormat": "{{view}}",
           "refId": "A",
           "format": "table",
           "instant": true
         },
         {
-          "expr": "histogram_quantile(0.95, sum by (le, view) (rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le, view) (rate(django_http_requests_latency_seconds_by_view_method_bucket{instance=~\"$instance\"}[5m])))",
           "legendFormat": "{{view}}",
           "refId": "B",
           "format": "table",
           "instant": true
         },
         {
-          "expr": "sum by (view) (rate(django_http_requests_latency_seconds_by_view_method_count[5m]))",
+          "expr": "sum by (view) (rate(django_http_requests_latency_seconds_by_view_method_count{instance=~\"$instance\"}[5m]))",
           "legendFormat": "{{view}}",
           "refId": "C",
           "format": "table",
@@ -180,7 +180,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
       "targets": [
         {
-          "expr": "sum(django_db_new_connections_total)",
+          "expr": "sum(django_db_new_connections_total{instance=~\"$instance\"})",
           "legendFormat": "new connections",
           "refId": "A"
         }
@@ -196,7 +196,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
       "targets": [
         {
-          "expr": "sum by (type) (rate(django_db_errors_total[5m]))",
+          "expr": "sum by (type) (rate(django_db_errors_total{instance=~\"$instance\"}[5m]))",
           "legendFormat": "{{type}}",
           "refId": "A"
         }
@@ -210,7 +210,11 @@
   "refresh": "10s",
   "schemaVersion": 39,
   "tags": ["deki", "api"],
-  "templating": { "list": [] },
+  "templating": {
+    "list": [
+      {"name": "instance", "label": "web", "type": "query", "datasource": null, "query": {"query": "label_values(django_http_requests_total_by_method_total{job=\"django\"}, instance)", "refId": "instance"}, "definition": "label_values(django_http_requests_total_by_method_total{job=\"django\"}, instance)", "refresh": 2, "includeAll": true, "allValue": ".*", "multi": true, "current": {"selected": true, "text": ["All"], "value": ["$__all"]}, "sort": 1, "hide": 0}
+    ]
+  },
   "time": { "from": "now-1h", "to": "now" },
   "title": "Deki API Performance",
   "uid": "deki-api-perf"
