@@ -6,7 +6,7 @@ scrape_configs:
   - job_name: "django"
     metrics_path: /metrics
     static_configs:
-      - targets: ["deki-mono-web-1:8000", "deki-mono-web-2:8000"]
+      - targets: ["deki-mono-web-1:8000", "deki-mono-web2-1:8000"]
         labels:
           service: "deki-api"
 
